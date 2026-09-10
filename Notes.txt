@@ -1,0 +1,1923 @@
+============================================================
+TASK 3: JAVA APPLICATION USING GRADLE + JENKINS CI/CD
+============================================================
+
+PROJECT TITLE:
+Java Application Build and Deployment Automation using Gradle and Jenkins
+
+OBJECTIVE:
+The objective of this project is to automate the build, testing, packaging,
+and deployment of a Java application using Gradle and Jenkins.
+
+The project demonstrates the following DevOps concepts:
+
+1. Java application development
+2. Gradle build automation
+3. Dependency management
+4. Unit testing using JUnit
+5. Git version control
+6. GitHub repository management
+7. Jenkins Continuous Integration
+8. Jenkins Continuous Deployment
+9. GitHub Webhook
+10. Automated JAR generation
+11. Artifact archiving
+12. Automated application deployment
+
+
+============================================================
+1. TECHNOLOGIES AND TOOLS USED
+============================================================
+
+Java 21
+Gradle 8.14.3
+Git
+GitHub
+Jenkins
+JUnit 5
+AWS EC2
+Linux
+Bash/Shell
+
+
+============================================================
+2. PROJECT ARCHITECTURE
+============================================================
+
+Developer
+    |
+    | git push
+    |
+    v
+GitHub Repository
+    |
+    | GitHub Webhook
+    |
+    v
+Jenkins
+    |
+    v
+Checkout Source Code
+    |
+    v
+Gradle Build
+    |
+    v
+JUnit Testing
+    |
+    v
+Generate JAR
+    |
+    v
+Archive JAR
+    |
+    v
+Deploy JAR
+    |
+    v
+Run Java Application
+
+
+SHORT FORM:
+
+GitHub -> Webhook -> Jenkins -> Gradle -> Build -> Test -> JAR -> Deploy
+
+
+============================================================
+3. AWS EC2 INSTANCE
+============================================================
+
+We used a Linux AWS EC2 instance as the server/environment for this project.
+
+We worked as root user.
+
+Project location:
+
+/opt/java-gradle-app
+
+
+To check current directory:
+
+pwd
+
+To list files:
+
+ls -la
+
+
+============================================================
+4. INSTALL GIT
+============================================================
+
+Git is used for version control.
+
+Install Git:
+
+yum install git -y
+
+Check Git version:
+
+git --version
+
+Purpose of Git:
+
+Git tracks changes in source code and allows us to maintain different
+versions of the project.
+
+Basic Git workflow:
+
+Working Directory
+       |
+       v
+git add
+       |
+       v
+Staging Area
+       |
+       v
+git commit
+       |
+       v
+Local Repository
+       |
+       v
+git push
+       |
+       v
+GitHub
+
+
+============================================================
+5. INSTALL GRADLE
+============================================================
+
+Gradle is a build automation tool.
+
+We installed Gradle version:
+
+Gradle 8.14.3
+
+Gradle installation location:
+
+/opt/gradle-8.14.3
+
+
+Set Gradle environment variables:
+
+export GRADLE_HOME=/opt/gradle-8.14.3
+
+export PATH=$GRADLE_HOME/bin:$PATH
+
+
+Check Gradle:
+
+gradle --version
+
+
+Gradle is used for:
+
+1. Compiling Java code
+2. Managing dependencies
+3. Running tests
+4. Creating JAR files
+5. Automating the build process
+
+
+============================================================
+6. JENKINS INSTALLATION
+============================================================
+
+Jenkins is an automation server used for CI/CD.
+
+Jenkins performs tasks automatically such as:
+
+1. Checkout source code
+2. Build application
+3. Run tests
+4. Generate artifacts
+5. Deploy application
+
+
+Important:
+
+Jenkins itself was installed as a system service.
+
+Gradle was installed separately under:
+
+/opt/gradle-8.14.3
+
+
+============================================================
+7. JENKINS GRADLE CONFIGURATION
+============================================================
+
+In Jenkins:
+
+Manage Jenkins
+    |
+    v
+Tools
+    |
+    v
+Gradle installations
+
+
+We configured:
+
+Name:
+
+Gradle-8.14.3
+
+GRADLE_HOME:
+
+/opt/gradle-8.14.3
+
+
+Automatic installation was disabled because Gradle was already installed
+manually on the server.
+
+
+============================================================
+8. CREATE PROJECT DIRECTORY
+============================================================
+
+Create project directory:
+
+mkdir -p /opt/java-gradle-app
+
+Go to project directory:
+
+cd /opt/java-gradle-app
+
+
+Check:
+
+pwd
+
+Expected:
+
+/opt/java-gradle-app
+
+
+============================================================
+9. CREATE PROJECT DIRECTORIES
+============================================================
+
+Create main Java directory:
+
+mkdir -p src/main/java/com/example
+
+Create test directory:
+
+mkdir -p src/test/java/com/example
+
+
+Final project structure:
+
+java-gradle-app/
+|
+|-- build.gradle
+|-- settings.gradle
+|-- .gitignore
+|
+|-- src/
+|   |
+|   |-- main/
+|   |   |
+|   |   |-- java/
+|   |       |
+|   |       |-- com/
+|   |           |
+|   |           |-- example/
+|   |               |
+|   |               |-- App.java
+|   |
+|   |-- test/
+|       |
+|       |-- java/
+|           |
+|           |-- com/
+|               |
+|               |-- example/
+|                   |
+|                   |-- AppTest.java
+|
+|-- build/
+    |
+    |-- libs/
+        |
+        |-- java-gradle-app-1.0.jar
+
+
+NOTE:
+
+The build directory is generated automatically by Gradle.
+It should not be pushed to GitHub.
+
+
+============================================================
+10. CREATE settings.gradle
+============================================================
+
+File:
+
+settings.gradle
+
+
+Content:
+
+rootProject.name = 'java-gradle-app'
+
+
+PURPOSE:
+
+settings.gradle defines the Gradle project name.
+
+The project name is:
+
+java-gradle-app
+
+
+============================================================
+11. CREATE build.gradle
+============================================================
+
+File:
+
+build.gradle
+
+
+Content:
+
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'com.example'
+version = '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+}
+
+application {
+    mainClass = 'com.example.App'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jar {
+    manifest {
+        attributes(
+            'Main-Class': 'com.example.App'
+        )
+    }
+}
+
+
+============================================================
+12. EXPLANATION OF build.gradle
+============================================================
+
+plugins {
+    id 'java'
+    id 'application'
+}
+
+
+The Java plugin provides:
+
+1. Java compilation
+2. Java testing
+3. JAR packaging
+
+
+The application plugin allows Gradle to configure the project as a
+runnable Java application.
+
+
+GROUP:
+
+group = 'com.example'
+
+This identifies the project/group.
+
+
+VERSION:
+
+version = '1.0'
+
+This defines the application version.
+
+
+REPOSITORY:
+
+repositories {
+    mavenCentral()
+}
+
+Maven Central is a public repository used to download Java dependencies.
+
+
+DEPENDENCY:
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+}
+
+
+This adds JUnit 5 for testing.
+
+The dependency has three main parts:
+
+Group:
+org.junit.jupiter
+
+Artifact:
+junit-jupiter
+
+Version:
+5.10.0
+
+
+testImplementation means that this dependency is used for testing.
+
+
+MAIN CLASS:
+
+application {
+    mainClass = 'com.example.App'
+}
+
+
+This tells Gradle that the main application class is:
+
+com.example.App
+
+
+TEST CONFIGURATION:
+
+test {
+    useJUnitPlatform()
+}
+
+
+This configures Gradle to run JUnit tests using the JUnit Platform.
+
+
+JAR MANIFEST:
+
+jar {
+    manifest {
+        attributes(
+            'Main-Class': 'com.example.App'
+        )
+    }
+}
+
+
+This adds the Main-Class information to the generated JAR.
+
+
+============================================================
+13. CREATE App.java
+============================================================
+
+File:
+
+src/main/java/com/example/App.java
+
+
+Code:
+
+package com.example;
+
+public class App {
+
+    public static void main(String[] args) {
+        System.out.println("Hello from Java Gradle Application!");
+        System.out.println("Build and deployment automated using Gradle and Jenkins.");
+    }
+}
+
+
+This is the main Java application.
+
+Execution starts from:
+
+public static void main(String[] args)
+
+
+============================================================
+14. CREATE AppTest.java
+============================================================
+
+File:
+
+src/test/java/com/example/AppTest.java
+
+
+Code:
+
+package com.example;
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class AppTest {
+
+    @Test
+    void testApplication() {
+        String message = "Hello from Java Gradle Application!";
+        assertEquals("Hello from Java Gradle Application!", message);
+    }
+}
+
+
+This is a JUnit unit test.
+
+The test checks whether the expected message is equal to the actual message.
+
+
+============================================================
+15. GRADLE BUILD
+============================================================
+
+Check Gradle:
+
+gradle --version
+
+
+Clean old build files:
+
+gradle clean
+
+
+Build the project:
+
+gradle build
+
+
+Clean and build together:
+
+gradle clean build
+
+
+gradle clean build performs tasks such as:
+
+1. Remove previous build files
+2. Compile Java source code
+3. Compile test code
+4. Run tests
+5. Create JAR
+6. Create other build artifacts
+
+
+Successful output:
+
+BUILD SUCCESSFUL
+
+
+============================================================
+16. CHECK GENERATED JAR
+============================================================
+
+Command:
+
+ls -la build/libs
+
+
+Expected JAR:
+
+java-gradle-app-1.0.jar
+
+
+The JAR is the packaged Java application.
+
+
+============================================================
+17. RUN THE JAR
+============================================================
+
+Command:
+
+java -jar build/libs/java-gradle-app-1.0.jar
+
+
+Expected output:
+
+Hello from Java Gradle Application!
+
+Build and deployment automated using Gradle and Jenkins.
+
+
+============================================================
+18. PROBLEM WE FACED: NO MAIN MANIFEST ATTRIBUTE
+============================================================
+
+Initially, when we ran:
+
+java -jar build/libs/java-gradle-app-1.0.jar
+
+
+We received:
+
+no main manifest attribute
+
+
+REASON:
+
+The JAR did not contain information about which Java class should be
+executed first.
+
+
+SOLUTION:
+
+We added the following to build.gradle:
+
+jar {
+    manifest {
+        attributes(
+            'Main-Class': 'com.example.App'
+        )
+    }
+}
+
+
+Then we ran:
+
+gradle clean build
+
+
+After rebuilding, the JAR could be executed using:
+
+java -jar build/libs/java-gradle-app-1.0.jar
+
+
+============================================================
+19. JAVA JDK / JAVAC PROBLEM
+============================================================
+
+We also faced a Gradle Java toolchain problem.
+
+Gradle displayed:
+
+Toolchain installation does not provide the required capabilities:
+[JAVA_COMPILER]
+
+
+The important issue was that Gradle detected the Java installation as:
+
+Is JDK: false
+
+
+But javac was actually available.
+
+
+We checked Java:
+
+java -version
+
+
+We checked Java compiler:
+
+javac -version
+
+
+Output:
+
+javac 21.0.12.1
+
+
+We checked Java location:
+
+which java
+
+
+We checked compiler location:
+
+which javac
+
+
+We also checked Gradle Java toolchains:
+
+gradle -q javaToolchains
+
+
+Gradle initially detected:
+
+Amazon Corretto JRE 21
+
+Is JDK: false
+
+
+The problem was Gradle's toolchain/daemon detection.
+
+
+We stopped the Gradle daemon:
+
+gradle --stop
+
+
+After correcting the Java environment and restarting Gradle,
+the build succeeded.
+
+
+IMPORTANT INTERVIEW POINT:
+
+If Gradle cannot find the Java compiler:
+
+1. Check java -version
+2. Check javac -version
+3. Check which java
+4. Check which javac
+5. Check gradle -q javaToolchains
+6. Verify JAVA_HOME
+7. Restart Gradle daemon using gradle --stop
+8. Run gradle clean build again
+
+
+============================================================
+20. JAVA_HOME
+============================================================
+
+Our Java installation was:
+
+/usr/lib/jvm/java-21-amazon-corretto.x86_64
+
+
+Set JAVA_HOME:
+
+export JAVA_HOME=/usr/lib/jvm/java-21-amazon-corretto.x86_64
+
+
+Add Java bin to PATH:
+
+export PATH=$JAVA_HOME/bin:$PATH
+
+
+Check:
+
+echo $JAVA_HOME
+
+javac -version
+
+java -version
+
+
+============================================================
+21. CREATE .gitignore
+============================================================
+
+Create .gitignore:
+
+cat > .gitignore <<'EOF'
+.gradle/
+build/
+EOF
+
+
+Purpose:
+
+.gradle/ contains Gradle-related local files.
+
+build/ contains generated build output.
+
+These files should normally not be committed to GitHub.
+
+
+============================================================
+22. INITIALIZE GIT
+============================================================
+
+Go to project:
+
+cd /opt/java-gradle-app
+
+
+Initialize Git:
+
+git init
+
+
+Check status:
+
+git status
+
+
+============================================================
+23. CHANGE BRANCH TO MAIN
+============================================================
+
+Command:
+
+git branch -M main
+
+
+Check:
+
+git branch
+
+
+Expected:
+
+* main
+
+
+============================================================
+24. ADD PROJECT FILES
+============================================================
+
+Command:
+
+git add .
+
+
+This moves files to the Git staging area.
+
+
+Check:
+
+git status
+
+
+============================================================
+25. CREATE GIT COMMIT
+============================================================
+
+Command:
+
+git commit -m "Initial Java Gradle application"
+
+
+A commit stores the changes in the local Git repository.
+
+
+============================================================
+26. REMOVE GENERATED FILES FROM GIT TRACKING
+============================================================
+
+Initially some generated files from build/ and .gradle/ were tracked.
+
+We removed them from Git tracking using:
+
+git rm -r --cached .gradle build
+
+
+Then:
+
+git add .gitignore
+
+
+Then updated the previous commit:
+
+git commit --amend --no-edit
+
+
+Check:
+
+git status
+
+
+Expected:
+
+nothing to commit, working tree clean
+
+
+IMPORTANT:
+
+.gitignore prevents these generated files from being committed again.
+
+
+============================================================
+27. GITHUB
+============================================================
+
+We created/used a GitHub repository for the project.
+
+The local project was connected to GitHub using:
+
+git remote add origin YOUR_GITHUB_REPOSITORY
+
+
+Check remote:
+
+git remote -v
+
+
+Expected:
+
+origin  YOUR_GITHUB_REPOSITORY (fetch)
+
+origin  YOUR_GITHUB_REPOSITORY (push)
+
+
+Push code:
+
+git push -u origin main
+
+
+The project was successfully pushed to GitHub.
+
+
+============================================================
+28. GITHUB PURPOSE
+============================================================
+
+GitHub is used as a remote repository.
+
+It provides:
+
+1. Source code storage
+2. Version control collaboration
+3. Remote repository
+4. Integration with Jenkins
+5. Webhook support
+
+
+============================================================
+29. JENKINS JOB CREATION
+============================================================
+
+In Jenkins:
+
+Dashboard
+   |
+   v
+New Item
+   |
+   v
+Enter project name:
+java-gradle-app
+   |
+   v
+Select:
+Pipeline
+   |
+   v
+OK
+
+
+We created a Jenkins Pipeline job called:
+
+java-gradle-app
+
+
+============================================================
+30. JENKINS PIPELINE
+============================================================
+
+Our Jenkins pipeline has four main stages:
+
+1. Checkout
+2. Build and Test
+3. Archive JAR
+4. Deploy
+
+
+Pipeline flow:
+
+Checkout
+   |
+   v
+Build and Test
+   |
+   v
+Archive JAR
+   |
+   v
+Deploy
+
+
+============================================================
+31. CHECKOUT STAGE
+============================================================
+
+The Checkout stage gets the latest code from GitHub.
+
+Example:
+
+stage('Checkout') {
+    steps {
+        git branch: 'main',
+            url: 'YOUR_GITHUB_REPOSITORY'
+    }
+}
+
+
+Purpose:
+
+Jenkins downloads the source code from the main branch.
+
+
+============================================================
+32. BUILD AND TEST STAGE
+============================================================
+
+Jenkins runs Gradle.
+
+Example:
+
+stage('Build and Test') {
+    steps {
+        sh '''
+            export JAVA_HOME=/usr/lib/jvm/java-21-amazon-corretto.x86_64
+            export PATH=$JAVA_HOME/bin:/opt/gradle-8.14.3/bin:$PATH
+
+            java -version
+            javac -version
+            gradle --version
+
+            gradle clean build
+        '''
+    }
+}
+
+
+This stage:
+
+1. Sets JAVA_HOME
+2. Sets Gradle PATH
+3. Checks Java
+4. Checks javac
+5. Checks Gradle
+6. Runs Gradle build
+7. Runs tests
+8. Creates JAR
+
+
+============================================================
+33. ARCHIVE JAR STAGE
+============================================================
+
+Jenkins archives the generated JAR.
+
+Configuration:
+
+stage('Archive JAR') {
+    steps {
+        archiveArtifacts artifacts: 'build/libs/*.jar',
+            fingerprint: true
+    }
+}
+
+
+Purpose:
+
+The generated JAR is stored as a Jenkins build artifact.
+
+This allows us to keep the artifact associated with a particular Jenkins build.
+
+
+============================================================
+34. DEPLOYMENT DIRECTORY
+============================================================
+
+We created:
+
+mkdir -p /opt/java-gradle-app/deploy
+
+
+Jenkins runs as the jenkins user.
+
+Therefore we gave ownership of the deployment directory to Jenkins:
+
+chown -R jenkins:jenkins /opt/java-gradle-app/deploy
+
+
+Check:
+
+ls -ld /opt/java-gradle-app/deploy
+
+
+Purpose:
+
+Jenkins needs permission to copy the generated JAR into the deployment
+directory.
+
+
+============================================================
+35. DEPLOY STAGE
+============================================================
+
+Our deployment stage:
+
+stage('Deploy') {
+    steps {
+        sh '''
+            mkdir -p /opt/java-gradle-app/deploy
+
+            cp build/libs/*.jar /opt/java-gradle-app/deploy/app.jar
+
+            pkill -f 'java -jar /opt/java-gradle-app/deploy/app.jar' || true
+
+            nohup java -jar /opt/java-gradle-app/deploy/app.jar \
+                > /opt/java-gradle-app/deploy/app.log 2>&1 &
+        '''
+    }
+}
+
+
+What happens:
+
+First the deployment directory is created.
+
+Then the generated JAR is copied:
+
+build/libs/*.jar
+
+to:
+
+/opt/java-gradle-app/deploy/app.jar
+
+
+If an older application process is running, it is stopped.
+
+Then the new JAR is started.
+
+Application log is written to:
+
+/opt/java-gradle-app/deploy/app.log
+
+
+============================================================
+36. COMPLETE JENKINS PIPELINE
+============================================================
+
+pipeline {
+    agent any
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                git branch: 'main',
+                    url: 'YOUR_GITHUB_REPOSITORY'
+            }
+        }
+
+        stage('Build and Test') {
+            steps {
+                sh '''
+                    export JAVA_HOME=/usr/lib/jvm/java-21-amazon-corretto.x86_64
+                    export PATH=$JAVA_HOME/bin:/opt/gradle-8.14.3/bin:$PATH
+
+                    java -version
+                    javac -version
+                    gradle --version
+
+                    gradle clean build
+                '''
+            }
+        }
+
+        stage('Archive JAR') {
+            steps {
+                archiveArtifacts artifacts: 'build/libs/*.jar',
+                    fingerprint: true
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                sh '''
+                    mkdir -p /opt/java-gradle-app/deploy
+
+                    cp build/libs/*.jar /opt/java-gradle-app/deploy/app.jar
+
+                    pkill -f 'java -jar /opt/java-gradle-app/deploy/app.jar' || true
+
+                    nohup java -jar /opt/java-gradle-app/deploy/app.jar \
+                        > /opt/java-gradle-app/deploy/app.log 2>&1 &
+                '''
+            }
+        }
+    }
+}
+
+
+============================================================
+37. JENKINS BUILD
+============================================================
+
+After saving the Pipeline:
+
+Jenkins
+   |
+   v
+java-gradle-app
+   |
+   v
+Build Now
+
+
+We successfully executed the Jenkins build.
+
+Expected stages:
+
+Checkout
+Build and Test
+Archive JAR
+Deploy
+
+
+Final result:
+
+SUCCESS
+
+
+============================================================
+38. CONTINUOUS INTEGRATION
+============================================================
+
+CI means:
+
+Continuous Integration.
+
+
+In our project:
+
+Developer
+   |
+   v
+GitHub
+   |
+   v
+Jenkins
+   |
+   v
+Checkout
+   |
+   v
+Gradle Build
+   |
+   v
+JUnit Test
+
+
+Every new code change can be automatically built and tested.
+
+
+============================================================
+39. CONTINUOUS DEPLOYMENT
+============================================================
+
+CD means:
+
+Continuous Deployment.
+
+
+Our CD flow:
+
+Successful Build
+      |
+      v
+JAR Generated
+      |
+      v
+Jenkins Archive
+      |
+      v
+Deploy JAR
+      |
+      v
+Run Java Application
+
+
+============================================================
+40. GITHUB WEBHOOK
+============================================================
+
+A webhook allows GitHub to notify Jenkins when an event occurs.
+
+
+GitHub Webhook flow:
+
+Developer
+   |
+   | git push
+   v
+GitHub
+   |
+   | webhook
+   v
+Jenkins
+   |
+   v
+Pipeline starts
+
+
+============================================================
+41. GITHUB WEBHOOK CONFIGURATION
+============================================================
+
+Go to:
+
+GitHub Repository
+   |
+   v
+Settings
+   |
+   v
+Webhooks
+   |
+   v
+Add webhook
+
+
+Payload URL:
+
+http://EC2_PUBLIC_IP:8080/github-webhook/
+
+
+Content type:
+
+application/json
+
+
+Events:
+
+Just the push event
+
+
+Active:
+
+Enabled
+
+
+The webhook was successfully created.
+
+GitHub also sent a ping payload to test the webhook.
+
+
+============================================================
+42. AWS SECURITY GROUP
+============================================================
+
+Jenkins runs on port:
+
+8080
+
+
+Therefore the EC2 Security Group must allow inbound traffic to port 8080
+for Jenkins/webhook connectivity.
+
+
+We checked the Security Group and confirmed port 8080 was allowed.
+
+
+Example:
+
+Type:
+Custom TCP
+
+Port:
+8080
+
+
+============================================================
+43. COMPLETE AUTOMATED FLOW
+============================================================
+
+Developer changes Java code.
+
+Then:
+
+git add .
+
+git commit -m "Update application"
+
+git push origin main
+
+
+GitHub receives the new code.
+
+GitHub sends webhook notification to Jenkins.
+
+Jenkins receives webhook.
+
+Jenkins starts the Pipeline.
+
+Jenkins checks out the latest code.
+
+Gradle builds the application.
+
+JUnit tests are executed.
+
+Gradle generates the JAR.
+
+Jenkins archives the JAR.
+
+Jenkins copies the JAR to the deployment directory.
+
+Jenkins starts the application.
+
+Final flow:
+
+Developer
+    |
+    | git push
+    v
+GitHub
+    |
+    | webhook
+    v
+Jenkins
+    |
+    | checkout
+    v
+Source Code
+    |
+    | gradle clean build
+    v
+Build + Test
+    |
+    v
+JAR
+    |
+    v
+Archive
+    |
+    v
+Deploy
+    |
+    v
+Running Java Application
+
+
+============================================================
+44. IMPORTANT GRADLE COMMANDS
+============================================================
+
+Check Gradle version:
+
+gradle --version
+
+
+Clean build files:
+
+gradle clean
+
+
+Build project:
+
+gradle build
+
+
+Clean and build:
+
+gradle clean build
+
+
+Check Gradle Java toolchains:
+
+gradle -q javaToolchains
+
+
+Stop Gradle daemon:
+
+gradle --stop
+
+
+============================================================
+45. IMPORTANT JAVA COMMANDS
+============================================================
+
+Check Java:
+
+java -version
+
+
+Check Java compiler:
+
+javac -version
+
+
+Find Java:
+
+which java
+
+
+Find Java compiler:
+
+which javac
+
+
+Run JAR:
+
+java -jar build/libs/java-gradle-app-1.0.jar
+
+
+============================================================
+46. IMPORTANT GIT COMMANDS
+============================================================
+
+Initialize repository:
+
+git init
+
+
+Check status:
+
+git status
+
+
+Add files:
+
+git add .
+
+
+Commit:
+
+git commit -m "message"
+
+
+Change branch:
+
+git branch -M main
+
+
+Check branch:
+
+git branch
+
+
+Check remote:
+
+git remote -v
+
+
+Push:
+
+git push origin main
+
+
+============================================================
+47. IMPORTANT LINUX COMMANDS USED
+============================================================
+
+Print current directory:
+
+pwd
+
+
+List files:
+
+ls -la
+
+
+Change directory:
+
+cd directory-name
+
+
+Create directory:
+
+mkdir -p directory-name
+
+
+Display file:
+
+cat filename
+
+
+Change ownership:
+
+chown -R jenkins:jenkins directory
+
+
+============================================================
+48. IMPORTANT FILES
+============================================================
+
+build.gradle
+
+Purpose:
+Main Gradle configuration file.
+
+It contains:
+
+Plugins
+Repositories
+Dependencies
+Application configuration
+Testing configuration
+
+settings.gradle
+
+Purpose:
+Defines the Gradle project name.
+
+
+App.java
+
+Purpose:
+Main Java application.
+
+
+AppTest.java
+
+Purpose:
+JUnit unit test.
+.gitignore
+
+Purpose:
+Prevents generated files from being committed to Git.
+
+
+JAR
+
+Purpose:
+Packaged Java application.
+
+
+Jenkins Pipeline
+
+Purpose:
+Automates CI/CD.
+
+
+============================================================
+74. PROJECT PROBLEMS AND SOLUTIONS
+============================================================
+
+PROBLEM 1:
+
+Gradle command not found.
+
+ERROR:
+
+gradle: command not found
+
+
+SOLUTION:
+
+Set Gradle environment:
+
+export GRADLE_HOME=/opt/gradle-8.14.3
+
+export PATH=$GRADLE_HOME/bin:$PATH
+
+
+------------------------------------------------------------
+
+PROBLEM 2:
+
+Java compiler not detected by Gradle.
+
+ERROR:
+
+JAVA_COMPILER
+
+
+SOLUTION:
+
+Check:
+
+java -version
+
+javac -version
+
+gradle -q javaToolchains
+
+Correct JAVA_HOME and restart Gradle daemon:
+
+gradle --stop
+
+
+------------------------------------------------------------
+
+PROBLEM 3:
+
+JAR cannot be executed.
+
+ERROR:
+
+no main manifest attribute
+
+
+SOLUTION:
+
+Add:
+
+jar {
+    manifest {
+        attributes(
+            'Main-Class': 'com.example.App'
+        )
+    }
+}
+
+
+Then:
+
+gradle clean build
+
+
+------------------------------------------------------------
+
+PROBLEM 4:
+
+Generated build files were going into Git.
+
+SOLUTION:
+
+Create .gitignore:
+
+.gradle/
+build/
+
+
+Remove tracked generated files:
+
+git rm -r --cached .gradle build
+
+
+------------------------------------------------------------
+
+PROBLEM 5:
+
+Jenkins deployment needs permission.
+
+SOLUTION:
+
+Create deployment directory:
+
+mkdir -p /opt/java-gradle-app/deploy
+
+
+Give Jenkins ownership:
+
+chown -R jenkins:jenkins /opt/java-gradle-app/deploy
+
+
+------------------------------------------------------------
+
+PROBLEM 6:
+
+GitHub webhook needs Jenkins access.
+
+SOLUTION:
+
+Allow TCP port 8080 in the EC2 Security Group.
+
+
+============================================================
+75. PROJECT RESULT
+============================================================
+
+The final project successfully demonstrates:
+
+Java application
++
+Gradle
++
+JUnit
++
+Git
++
+GitHub
++
+Jenkins
++
+GitHub Webhook
++
+Automated Build
++
+Automated Testing
++
+JAR Packaging
++
+Artifact Archiving
++
+Automated Deployment
+
+
+FINAL RESULT:
+
+Developer pushes code to GitHub.
+
+GitHub sends webhook to Jenkins.
+
+Jenkins starts the pipeline.
+
+Jenkins checks out the source code.
+
+Gradle builds the application.
+
+JUnit tests are executed.
+
+Gradle generates the JAR.
+
+Jenkins archives the JAR.
+
+Jenkins deploys the JAR.
+
+Java application starts successfully.
+
+
+============================================================
+76. MOST IMPORTANT FLOW TO MEMORIZE
+============================================================
+
+Git push
+    |
+    v
+GitHub
+    |
+    v
+Webhook
+    |
+    v
+Jenkins
+    |
+    v
+Checkout
+    |
+    v
+Gradle
+    |
+    v
+Compile
+    |
+    v
+Test
+    |
+    v
+JAR
+    |
+    v
+Archive
+    |
+    v
+Deploy
+    |
+    v
+Application
+
+
+============================================================
+77. ONE-MINUTE INTERVIEW ANSWER
+============================================================
+
+"I created a Java application and used Gradle for build automation and
+dependency management. I configured JUnit for unit testing and generated
+an executable JAR.
+
+I used Git and GitHub for source code management and configured Jenkins
+for CI/CD.
+
+The Jenkins pipeline has Checkout, Build and Test, Archive JAR and
+Deploy stages.
+
+When code is pushed to GitHub, the GitHub webhook triggers Jenkins.
+Jenkins checks out the latest code, runs gradle clean build, executes
+the tests, creates the JAR and archives it.
+
+After successful validation, Jenkins copies the JAR to the deployment
+directory and starts the application.
+
+The complete CI/CD flow is:
+
+GitHub -> Webhook -> Jenkins -> Gradle -> Build -> Test -> JAR -> Deploy."
+
+
+============================================================
+78. FINAL PROJECT STATUS
+============================================================
+
+TASK 3: JAVA APPLICATION USING GRADLE
+
+STATUS: COMPLETED
+
+Java Application: DONE
+Gradle Installation: DONE
+Gradle Configuration: DONE
+Dependency Management: DONE
+JUnit Testing: DONE
+Executable JAR: DONE
+Git: DONE
+GitHub: DONE
+Jenkins: DONE
+Jenkins Pipeline: DONE
+CI: DONE
+Artifact Archiving: DONE
+Deployment: DONE
+GitHub Webhook: DONE
+AWS Security Group: DONE
+
+PROJECT FLOW:
+
+GitHub -> Jenkins -> Gradle -> Test -> JAR -> Deploy
+
+============================================================
+END OF NOTES
+============================================================
